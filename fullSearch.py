@@ -21,19 +21,21 @@ currentDate = now.strftime("%Y%m%d%H%M")
 
 enterprise_search_args = load_credentials('creds.yaml', yaml_key='search_tweets_enterprise', env_overwrite=False)
 
+# gen_rule_payload is a function to format filter rules for API calls but will not accept the args we need to filter
+#rule = gen_rule_payload("is raining", "has:geo", from_date="2018-04-15", to_date="2018-04-16", results_per_call=100)
+
 #this is the rule filter we should start with to catch ppl talking about rain by location
-rule = {"query": "\"is raining\" lang:en has:geo place_country:us", "maxResults":500, "toDate": "201805010000", "fromDate": "201801150000"}
+rule = {"query":"lang:en has:geo place_country:us", "maxResults":500, "toDate": "201805010000", "fromDate": "201801010000"}
 
 tweets = collect_results(rule,
-                         max_results=500,
+                         max_results=10000,
                          result_stream_args=enterprise_search_args)
 
 rs = ResultStream(rule_payload=rule,
                   max_results=500,
-                  max_pages=5,
+                  max_pages=1,
                   **enterprise_search_args)
 
-#correct data format for database dump
 # data = [{
 #     'tweet': {
 #         'tweet_date': tweet['created_at'],
@@ -49,18 +51,22 @@ rs = ResultStream(rule_payload=rule,
 
 
 #format for Josh's visuals
-data = [{
-    'tweet': {
-        'tweet_date': tweet['created_at'],
-        'place': tweet['place']['full_name']
-    }
-} for tweet in tweets]
+# data = [{
+#     'tweet': {
+#         'tweet_date': tweet['created_at'],
+#         'place': tweet['place']['full_name']
+#     }
+# } for tweet in tweets]
 
-pprint.pprint(data)
+# pprint.pprint(data)
+
 print('')
 print('')
-print("Length : %d" % len (data))
+print("Length with location : %d" % len (data))
+print('')
+print('')
+print("Length of total : %d" % len (tweets))
 
-
-with open('tweet_sample_data.json', 'w') as outfile:
+# #
+with open('2018_data.json', 'w') as outfile:
       json.dump(data, outfile, sort_keys=True, indent=4)
